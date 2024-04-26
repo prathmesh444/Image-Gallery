@@ -23,6 +23,7 @@ class ImageController extends GetxController {
   }
 
   getImageSet({required String topic}) async {
+    changeLoadingValue(true);
     if(prevTopic != topic) {
       PageNo = 1;
       prevTopic = topic;
@@ -32,6 +33,7 @@ class ImageController extends GetxController {
       prevTopic = topic;
       await loadMoreImages();
     }
+    changeLoadingValue(false);
     update();
   }
 

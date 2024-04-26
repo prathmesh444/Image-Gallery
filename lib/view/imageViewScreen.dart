@@ -15,7 +15,7 @@ class ImageBuilderScreen extends StatefulWidget {
 
 class _ImageBuilderScreenState extends State<ImageBuilderScreen> {
   ImageController imageCtrl = Get.put(ImageController());
-  Debouncer debouncer = Debouncer(delay: const Duration(milliseconds: 1500));
+  Debouncer debouncer = Debouncer(delay: const Duration(milliseconds: 700));
   TextEditingController textController = TextEditingController();
   @override
   Widget build(BuildContext context) {
@@ -35,28 +35,27 @@ class _ImageBuilderScreenState extends State<ImageBuilderScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                        Container(
-                          padding: const EdgeInsets.all(15),
-                          child: TextField(
-                            controller: textController,
-                            onChanged: (value) {
-                              debouncer.call(() { imageCtrl.getImageSet(topic: value); });
-                            },
-                            decoration:  InputDecoration(
-                              hintText: 'Search for images',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              prefixIcon: Icon(Icons.search),
-                              suffix: InkWell(
-                                  onTap: () {
-                                    textController.clear();
-                                  },
-                                  child: Icon(Icons.clear)
-                              ),
-                            ),
-                          ),
+                      SearchBar(
+                        controller: textController,
+                        onChanged: (value) {
+                          debouncer.call(() { imageCtrl.getImageSet(topic: value); });
+                        },
+                        hintText: 'Search for images',
+                        leading: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(Icons.search),
                         ),
+                        trailing: [
+                          InkWell(
+                            onTap: () => textController.clear(),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Icon(Icons.clear),
+                            )
+                          )
+                        ],
+                      ),
+
                         SizedBox(height: 10),
                       imageCtrl.isLoading
                           ? const Center(child: CircularProgressIndicator())
@@ -66,8 +65,8 @@ class _ImageBuilderScreenState extends State<ImageBuilderScreen> {
                             itemCount: imageCtrl.imageData?.hits.length ?? 0,
                             gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 4,
-                              crossAxisSpacing: 30,
-                              mainAxisSpacing: 30,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 10,
                               childAspectRatio: 1,
                             ),
                             itemBuilder: (context, index) {
@@ -77,6 +76,8 @@ class _ImageBuilderScreenState extends State<ImageBuilderScreen> {
                               Widget image = Image.network(
                                 imageCtrl.imageData?.hits[index].webformatURL ?? "",
                                 fit: BoxFit.cover,
+                                height: screenHeight * 0.3,
+                                width: screenWidth * 0.25,
                               );
                               return imageCtrl.imageData != null
                                   ? OpenContainer(
@@ -114,34 +115,31 @@ class _ImageBuilderScreenState extends State<ImageBuilderScreen> {
                                     );
                                   },
                                   closedBuilder: (BuildContext context, void Function() action) {
-                                    return Column(
-                                        children: [
-                                         Container(
-                                           height: screenHeight * 0.12 * (screenHeight * 0.002),
-                                             width: screenWidth * 0.2,
-                                             child: image
-                                         ),
-                                         Flexible(
-                                           child: Row(
+                                    return FittedBox(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                           image,
+                                           Row(
                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                              children: [
                                                Row(
                                                  children: [
-                                                   Icon(Icons.favorite, color: Colors.red, size: screenWidth * 0.005,),
-                                                    Text(" ${imageCtrl.imageData?.hits[index].likes ?? 0}", style: TextStyle(fontSize: screenWidth * 0.006),),
+                                                   Icon(Icons.favorite, color: Colors.red, size: 10,),
+                                                    Text(" ${imageCtrl.imageData?.hits[index].likes ?? 0}", style: TextStyle(fontSize: 12),),
                                                  ],
                                                ),
-                                                SizedBox(width: screenWidth * 0.005),
+                                                SizedBox(width: 10),
                                                 Row(
                                                   children: [
-                                                    Icon(Icons.remove_red_eye_outlined, color: Colors.blue, size: screenWidth * 0.005,),
-                                                    Text(" ${imageCtrl.imageData?.hits[index].downloads ?? 0}", style: TextStyle(fontSize: screenWidth * 0.006)),
+                                                    Icon(Icons.remove_red_eye_outlined, color: Colors.blue, size: 10,),
+                                                    Text(" ${imageCtrl.imageData?.hits[index].downloads ?? 0}", style: TextStyle(fontSize: 12)),
                                                   ],
                                                 ),
                                              ],
-                                           ),
-                                         )
-                                        ]
+                                           )
+                                          ]
+                                      ),
                                     );
                                   },
                                   )
